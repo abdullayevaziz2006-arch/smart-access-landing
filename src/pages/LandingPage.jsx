@@ -208,8 +208,8 @@ const LandingPage = () => {
                     Hikvision ANPR kameralari va mahalliy shlagbaum boshqaruv platasidan keladigan signallarni cloud server bilan sinxronizatsiya qiluvchi lokal tunnel-agent dasturi.
                   </p>
                   <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', alignItems: 'center' }}>
-                    <a href="#setup-guide" onClick={() => setActiveTab('agent')} className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '10px 20px', fontSize: '0.9rem', background: '#0ea5e9' }}>
-                      <Download size={16} /> Yuklab Olish (3.2 MB)
+                    <a href="https://github.com/abdullayevaziz2006-arch/smartpark-shlagbaum/releases" target="_blank" rel="noreferrer" className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '10px 20px', fontSize: '0.9rem', background: '#0ea5e9' }}>
+                      <Download size={16} /> Yuklab Olish (Zip Paket)
                     </a>
                     <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Tizim: Windows 10/11 x64, Node JS v18+</span>
                   </div>
@@ -225,8 +225,8 @@ const LandingPage = () => {
                     Bog'larga kirish joyidagi turniket terminallari (Hikvision/Dahua) bilan bog'lanib, shtrix va QR kodlarni onlayn tekshiruvchi va ruxsat beruvchi terminal dasturi.
                   </p>
                   <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', alignItems: 'center' }}>
-                    <a href="#setup-guide" onClick={() => setActiveTab('terminal')} className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '10px 20px', fontSize: '0.9rem', background: '#6366f1' }}>
-                      <Download size={16} /> Yuklab Olish (4.1 MB)
+                    <a href="https://github.com/abdullayevaziz2006-arch/xiva-lokomotiv-qr/releases" target="_blank" rel="noreferrer" className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '10px 20px', fontSize: '0.9rem', background: '#6366f1' }}>
+                      <Download size={16} /> Yuklab Olish (Zip Paket)
                     </a>
                     <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Tizim: Windows 10/11, Port: 8090</span>
                   </div>
