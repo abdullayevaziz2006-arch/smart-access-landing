@@ -154,63 +154,184 @@ const LandingPage = () => {
 
         <div style={{ flex: '1', minWidth: '320px' }} className="animate-float">
           {/* Hologram Box */}
-          <div className="relative border border-white/10 rounded-[2rem] bg-slate-950/80 p-6 shadow-2xl backdrop-blur-xl max-w-md mx-auto" style={{ borderBottom: '2px solid rgba(14,165,233,0.2)' }}>
+          <div style={{
+            position: 'relative',
+            border: '1px solid rgba(255, 255, 255, 0.08)',
+            borderRadius: '32px',
+            background: 'rgba(8, 12, 22, 0.65)',
+            padding: '24px',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 40px rgba(14, 165, 233, 0.1)',
+            backdropFilter: 'blur(20px)',
+            maxWidth: '420px',
+            margin: '0 auto',
+            borderBottom: '3px solid rgba(14, 165, 233, 0.3)'
+          }}>
             
             {/* Scan Screen */}
-            <div className="relative aspect-[16/10] bg-slate-900 border border-white/5 rounded-2xl overflow-hidden mb-6 flex flex-col items-center justify-center">
+            <div style={{
+              position: 'relative',
+              width: '100%',
+              height: '240px',
+              backgroundColor: '#090d16',
+              border: '1px solid rgba(255, 255, 255, 0.05)',
+              borderRadius: '20px',
+              overflow: 'hidden',
+              marginBottom: '24px',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '16px'
+            }}>
               {/* Grid pattern overlay */}
-              <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(14,165,233,0.05)_1px,transparent_1px),linear-gradient(to_bottom,rgba(14,165,233,0.05)_1px,transparent_1px)] bg-[length:20px_20px] opacity-40"></div>
+              <div className="grid-overlay" style={{ opacity: 0.15 }}></div>
               
               {/* Scan Line */}
               {simStep === 0 && <div className="scan-line"></div>}
 
               {/* Simulated Camera Feed Info */}
-              <div className="absolute top-3 left-3 flex items-center gap-2 z-20">
-                <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse"></span>
-                <span className="text-[10px] font-mono tracking-widest text-white/70">ANPR_CAMERA_01</span>
+              <div style={{
+                position: 'absolute',
+                top: '12px',
+                left: '12px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                zIndex: 20
+              }}>
+                <span style={{
+                  width: '8px',
+                  height: '8px',
+                  borderRadius: '50%',
+                  backgroundColor: '#ef4444',
+                  boxShadow: '0 0 8px #ef4444'
+                }} className="animate-pulse"></span>
+                <span style={{
+                  fontSize: '10px',
+                  fontFamily: 'monospace',
+                  letterSpacing: '1px',
+                  color: 'rgba(255, 255, 255, 0.6)'
+                }}>CAM_01_ANPR</span>
               </div>
 
               {/* Status text */}
-              <div className="text-center z-10 space-y-4">
+              <div style={{ textAlign: 'center', zIndex: 10, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
                 {simStep === 0 && (
-                  <div className="space-y-2">
-                    <div className="text-sm font-semibold tracking-wider text-blue-400 animate-pulse uppercase">Skanerlanmoqda...</div>
-                    <div className="text-[10px] font-mono text-gray-500">Kameralar signalni aniqlamoqda</div>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+                    <div className="animate-pulse" style={{
+                      fontSize: '14px',
+                      fontWeight: 600,
+                      letterSpacing: '2px',
+                      color: '#38bdf8',
+                      textTransform: 'uppercase'
+                    }}>Skanerlanmoqda...</div>
+                    <div style={{
+                      fontSize: '10px',
+                      fontFamily: 'monospace',
+                      color: '#64748b'
+                    }}>Avtomobil aniqlanmoqda</div>
                   </div>
                 )}
 
                 {simStep >= 1 && (
-                  <div className="space-y-4 animate-in fade-in duration-300">
-                    {/* License Plate Display */}
-                    <div className="relative border-4 border-slate-950 rounded-xl bg-white text-slate-950 font-bold px-6 py-2.5 text-2xl tracking-widest shadow-md flex items-center gap-2">
-                      <div className="flex flex-col items-center justify-between text-[8px] border-r border-slate-950 pr-1.5 mr-0.5">
-                        <span className="text-blue-600 font-extrabold leading-none">UZ</span>
+                  <div style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: '16px',
+                    animation: 'fadeIn 0.5s ease-out forwards'
+                  }}>
+                    {/* License Plate Display (Real Uz Style) */}
+                    <div style={{
+                      border: '3px solid #0f172a',
+                      borderRadius: '12px',
+                      backgroundColor: '#ffffff',
+                      color: '#0f172a',
+                      fontWeight: '800',
+                      padding: '6px 20px',
+                      fontSize: '24px',
+                      letterSpacing: '3px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '10px',
+                      boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.3)'
+                    }}>
+                      <div style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '9px',
+                        borderRight: '1px solid #0f172a',
+                        paddingRight: '6px',
+                        marginRight: '2px',
+                        color: '#2563eb',
+                        fontWeight: '900',
+                        lineHeight: '1'
+                      }}>
+                        <span>UZ</span>
                       </div>
                       <span>{simPlate}</span>
                     </div>
                     
                     {simStep === 1 && (
-                      <div className="text-[11px] font-mono text-amber-400 uppercase tracking-widest animate-pulse">Ma'lumotlar solishtirilmoqda...</div>
+                      <div className="animate-pulse" style={{
+                        fontSize: '11px',
+                        fontFamily: 'monospace',
+                        color: '#fbbf24',
+                        textTransform: 'uppercase',
+                        letterSpacing: '1px'
+                      }}>Baza tekshirilmoqda...</div>
                     )}
 
                     {simStep === 2 && (
-                      <div className="space-y-2">
+                      <div style={{ animation: 'fadeIn 0.3s ease-out forwards' }}>
                         {simType === 'WHITELIST' && (
-                          <span className="px-3 py-1 bg-green-500/10 border border-green-500/30 text-green-400 rounded-full text-xs font-bold uppercase tracking-wider">
-                            🟢 OQ RO'YXAT - SHLAGBAUM OCHILDI
+                          <span style={{
+                            padding: '6px 12px',
+                            backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                            border: '1px solid rgba(34, 197, 94, 0.3)',
+                            color: '#4ade80',
+                            borderRadius: '50px',
+                            fontSize: '11px',
+                            fontWeight: 'bold',
+                            letterSpacing: '1px'
+                          }}>
+                            🟢 OQ RO'YXAT - OCHILDI
                           </span>
                         )}
                         {simType === 'PAID' && (
-                          <span className="px-3 py-1 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 rounded-full text-xs font-bold uppercase tracking-wider">
-                            🟢 TO'LANDI - SHLAGBAUM OCHILDI
+                          <span style={{
+                            padding: '6px 12px',
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                            border: '1px solid rgba(16, 185, 129, 0.3)',
+                            color: '#34d399',
+                            borderRadius: '50px',
+                            fontSize: '11px',
+                            fontWeight: 'bold',
+                            letterSpacing: '1px'
+                          }}>
+                            🟢 TO'LANDI - OCHILDI
                           </span>
                         )}
                         {simType === 'UNPAID' && (
-                          <div className="space-y-2">
-                            <div className="px-3 py-1 bg-red-500/10 border border-red-500/30 text-red-400 rounded-full text-xs font-bold uppercase tracking-wider animate-bounce">
-                              🔴 TO'LOV KUTILMOQDA (10 000 UZS)
-                            </div>
-                            <div className="text-[10px] text-gray-400">Kassir to'lov oynasida to'lovni kutmoqda...</div>
+                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+                            <span className="animate-bounce" style={{
+                              padding: '6px 12px',
+                              backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                              border: '1px solid rgba(239, 68, 68, 0.3)',
+                              color: '#f87171',
+                              borderRadius: '50px',
+                              fontSize: '11px',
+                              fontWeight: 'bold',
+                              letterSpacing: '1px'
+                            }}>
+                              🔴 TO'LOV KUTILMOQDA (10K UZS)
+                            </span>
+                            <div style={{
+                              fontSize: '10px',
+                              color: '#64748b'
+                            }}>Kassir to'lovini kutyapti</div>
                           </div>
                         )}
                       </div>
@@ -221,27 +342,57 @@ const LandingPage = () => {
             </div>
 
             {/* Live Feed Event Log */}
-            <div className="space-y-2">
-              <div className="flex justify-between items-center text-xs text-gray-500 border-b border-white/5 pb-2">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                fontSize: '12px',
+                color: '#64748b',
+                borderBottom: '1px solid rgba(255,255,255,0.06)',
+                paddingBottom: '8px'
+              }}>
                 <span>Real vaqt hodisalari</span>
-                <span className="text-[10px] text-blue-400 font-mono">LIVE FEED</span>
+                <span style={{ fontSize: '10px', color: '#0ea5e9', fontFamily: 'monospace' }}>LIVE FEED</span>
               </div>
-              <div className="space-y-1.5 max-h-32 overflow-hidden">
+              <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '6px',
+                maxHeight: '120px',
+                overflow: 'hidden'
+              }}>
                 {simLog.map((log) => (
-                  <div key={log.id} className="flex items-center justify-between p-2 rounded-lg bg-white/5 border border-white/5 text-[11px] font-mono animate-in slide-in-from-top duration-300">
-                    <div className="flex items-center gap-2">
-                      <span className="text-gray-500">{log.time}</span>
-                      <span className="font-bold">{log.plate}</span>
+                  <div key={log.id} style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '8px 12px',
+                    borderRadius: '10px',
+                    backgroundColor: 'rgba(255,255,255,0.03)',
+                    border: '1px solid rgba(255,255,255,0.04)',
+                    fontSize: '11px',
+                    fontFamily: 'monospace'
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{ color: '#64748b' }}>{log.time}</span>
+                      <span style={{ fontWeight: 'bold', color: '#f8fafc' }}>{log.plate}</span>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <span className={`text-[9px] font-semibold px-2 py-0.5 rounded-full ${
-                        log.status === 'WHITELIST' ? 'bg-blue-500/10 text-blue-400' :
-                        log.status === 'PAID' ? 'bg-green-500/10 text-green-400' :
-                        'bg-red-500/10 text-red-400'
-                      }`}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{
+                        fontSize: '9px',
+                        fontWeight: '600',
+                        padding: '2px 8px',
+                        borderRadius: '50px',
+                        backgroundColor: log.status === 'WHITELIST' ? 'rgba(56, 189, 248, 0.1)' : log.status === 'PAID' ? 'rgba(52, 211, 153, 0.1)' : 'rgba(248, 113, 113, 0.1)',
+                        color: log.status === 'WHITELIST' ? '#38bdf8' : log.status === 'PAID' ? '#34d399' : '#f87171'
+                      }}>
                         {log.status}
                       </span>
-                      <span className={`font-semibold ${log.action === 'OPENED' ? 'text-green-400' : 'text-amber-400'}`}>
+                      <span style={{
+                        fontWeight: 'bold',
+                        color: log.action === 'OPENED' ? '#34d399' : '#fbbf24'
+                      }}>
                         {log.action}
                       </span>
                     </div>
