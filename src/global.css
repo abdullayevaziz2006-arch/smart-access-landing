@@ -1,37 +1,23 @@
-/* SmartAccess Corporate Design System (Light Theme) */
+/* SmartAccess Futuristic Design System (Dark-First Space Theme) */
 :root {
-  --primary: #1e40af;
-  --primary-light: #eff6ff;
+  --primary: #0ea5e9;
   --secondary: #6366f1;
-  --text-main: #1e293b;
-  --text-muted: #64748b;
-  --bg-main: #ffffff;
-  --bg-sub: #f8fafc;
-  --bg-card: #ffffff;
-  --border: #e2e8f0;
-  --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
-  --glass: rgba(255, 255, 255, 0.7);
-}
-
-[data-theme='dark'] {
-  --primary: #6366f1;
-  --primary-light: #1e293b;
-  --secondary: #818cf8;
-  --text-main: #f1f5f9;
+  --accent: #22c55e;
+  --text-main: #f8fafc;
   --text-muted: #94a3b8;
-  --bg-main: #0f172a;       /* Asosiy fon - Deep Navy */
-  --bg-sub: #080c16;        /* Sidebar/Footer foni - Midnight */
-  --card-bg: #1e293b;       /* Kartochkalar foni - Slate Navy */
-  --bg-card: #1e293b;
-  --border: rgba(255, 255, 255, 0.08);
-  --shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.5);
-  --glass: rgba(15, 23, 42, 0.8);
+  --bg-main: #030712;      /* Deep obsidian black */
+  --bg-sub: #090d16;       /* Midnight blue */
+  --bg-card: rgba(15, 23, 42, 0.4);
+  --border: rgba(255, 255, 255, 0.07);
+  --shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+  --glass: rgba(3, 7, 18, 0.6);
 }
 
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+  scroll-behavior: smooth;
 }
 
 body {
@@ -40,21 +26,71 @@ body {
   font-family: 'Inter', sans-serif;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  background-image: 
+    radial-gradient(ellipse at top, rgba(99, 102, 241, 0.1) 0%, transparent 60%),
+    radial-gradient(ellipse at bottom, rgba(14, 165, 233, 0.05) 0%, transparent 70%);
 }
 
 h1, h2, h3, h4, .outfit {
   font-family: 'Outfit', sans-serif;
   color: var(--text-main);
+  letter-spacing: -0.02em;
 }
 
 /* Animations */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; transform: translateY(20px); filter: blur(4px); }
+  to { opacity: 1; transform: translateY(0); filter: blur(0); }
 }
 
-.fade-in {
-  animation: fadeIn 0.8s ease-out forwards;
+@keyframes float {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-12px) rotate(0.5deg); }
+}
+
+@keyframes float-delayed {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(10px) rotate(-0.5deg); }
+}
+
+@keyframes glowPulse {
+  0%, 100% { opacity: 0.15; transform: scale(1); filter: blur(80px); }
+  50% { opacity: 0.28; transform: scale(1.15); filter: blur(100px); }
+}
+
+@keyframes scanLine {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(280px); }
+  100% { transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-float-delayed {
+  animation: float-delayed 8s ease-in-out infinite;
+}
+
+.animate-glow {
+  animation: glowPulse 8s ease-in-out infinite;
+}
+
+/* Custom Grid background */
+.grid-overlay {
+  position: absolute;
+  inset: 0;
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 50px 50px;
+  mask-image: radial-gradient(ellipse at center, black, transparent 80%);
+  pointer-events: none;
 }
 
 /* Utilities */
@@ -65,28 +101,31 @@ h1, h2, h3, h4, .outfit {
 }
 
 .section-padding {
-  padding: 100px 0;
+  padding: 120px 0;
 }
 
+/* Glassmorphism Cards */
 .card {
-  background: var(--bg-main);
+  background: var(--bg-card);
   border: 1px solid var(--border);
-  border-radius: 20px;
+  border-radius: 24px;
   padding: 32px;
+  backdrop-filter: blur(16px);
   box-shadow: var(--shadow);
-  transition: all 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  transform: translateY(-6px);
+  border-color: rgba(99, 102, 241, 0.3);
+  box-shadow: 0 30px 60px -15px rgba(99, 102, 241, 0.15);
 }
 
 .btn-primary {
-  background-color: var(--primary);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
   color: white;
   padding: 12px 24px;
-  border-radius: 10px;
+  border-radius: 14px;
   font-weight: 600;
   text-decoration: none;
   display: inline-flex;
@@ -94,20 +133,75 @@ h1, h2, h3, h4, .outfit {
   gap: 8px;
   border: none;
   cursor: pointer;
-  transition: 0.2s;
+  box-shadow: 0 10px 20px -10px rgba(14, 165, 233, 0.5);
+  transition: all 0.3s ease;
 }
 
 .btn-primary:hover {
-  background-color: #1a365d;
+  transform: translateY(-2px);
+  box-shadow: 0 15px 30px -10px rgba(14, 165, 233, 0.7);
+  opacity: 0.95;
+}
+
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border);
+  color: var(--text-main);
+  padding: 12px 24px;
+  border-radius: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
 }
 
 .nav-link {
   color: var(--text-muted);
   text-decoration: none;
   font-weight: 500;
-  transition: 0.2s;
+  position: relative;
+  padding: 6px 0;
+  transition: color 0.3s ease;
 }
 
 .nav-link:hover {
-  color: var(--primary);
+  color: var(--text-main);
+}
+
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, var(--primary), var(--secondary));
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.3s ease;
+}
+
+.nav-link:hover::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+/* Hologram screen scanner */
+.scan-line {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(180deg, transparent, var(--primary), transparent);
+  box-shadow: 0 0 15px var(--primary);
+  animation: scanLine 4s linear infinite;
+  z-index: 10;
 }

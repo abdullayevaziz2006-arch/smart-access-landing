@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   ShieldCheck, 
@@ -31,8 +31,62 @@ const LandingPage = () => {
   const [activeProduct, setActiveProduct] = useState(null);
   const [activeTab, setActiveTab] = useState('agent'); // For download guide tabs
 
+  // ANPR Scanner Simulator State
+  const [simStep, setSimStep] = useState(0); // 0: Scanning, 1: Recognized, 2: Access Granted / Payment Due
+  const [simPlate, setSimPlate] = useState('01A777AA');
+  const [simLog, setSimLog] = useState([
+    { id: 1, plate: '01A111AA', status: 'WHITELIST', action: 'OPENED', time: '20:30:15' },
+    { id: 2, plate: '10B222BB', status: 'PAID', action: 'OPENED', time: '20:32:44' },
+    { id: 3, plate: '01X700XX', status: 'UNPAID', action: 'WAITING', time: '20:34:02' }
+  ]);
+  const [simType, setSimType] = useState('WHITELIST'); // WHITELIST, PAID, UNPAID
+
+  useEffect(() => {
+    const plates = [
+      { num: '01A777AA', type: 'WHITELIST' },
+      { num: '10B999BB', type: 'UNPAID' },
+      { num: '30Z555ZZ', type: 'WHITELIST' },
+      { num: '01A123AA', type: 'PAID' }
+    ];
+    let idx = 0;
+
+    const interval = setInterval(() => {
+      setSimStep(0);
+      idx = (idx + 1) % plates.length;
+      const current = plates[idx];
+      setSimPlate(current.num);
+      setSimType(current.type);
+
+      setTimeout(() => {
+        setSimStep(1);
+      }, 1200);
+
+      setTimeout(() => {
+        setSimStep(2);
+        setSimLog(prev => [
+          {
+            id: Date.now(),
+            plate: current.num,
+            status: current.type,
+            action: current.type === 'UNPAID' ? 'WAITING' : 'OPENED',
+            time: new Date().toTimeString().split(' ')[0]
+          },
+          ...prev.slice(0, 2)
+        ]);
+      }, 2500);
+
+    }, 6000);
+
+    return () => clearInterval(interval);
+  }, []);
+
   return (
-    <div className="portfolio-wrapper">
+    <div className="portfolio-wrapper relative">
+      {/* Background neon elements */}
+      <div className="absolute top-1/4 left-10 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none animate-glow"></div>
+      <div className="absolute top-1/2 right-10 w-96 h-96 bg-sky-500/5 rounded-full blur-3xl pointer-events-none animate-glow" style={{ animationDelay: '-4s' }}></div>
+      <div className="grid-overlay"></div>
+
       {/* HEADER */}
       <header style={{ 
         borderBottom: '1px solid var(--border)', 
@@ -67,18 +121,23 @@ const LandingPage = () => {
       </header>
 
       {/* HERO SECTION */}
-      <section className="container section-padding fade-in" style={{ 
+      <section className="container section-padding animate-fade-in relative z-10" style={{ 
         display: 'flex', 
         alignItems: 'center', 
         gap: '64px',
-        paddingTop: '120px'
+        paddingTop: '120px',
+        flexWrap: 'wrap'
       }}>
-        <div style={{ flex: 1.2 }}>
-          <h1 className="outfit" style={{ fontSize: '4.2rem', lineHeight: 1.1, marginBottom: '24px', fontWeight: 900 }}>
-            SmartAccess & <span style={{ color: 'var(--primary)' }}>SmartPark</span> <br /> Kelajak IT Yechimlari
+        <div style={{ flex: '1.2', minWidth: '320px' }}>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/10 bg-white/[0.03] text-xs font-semibold text-sky-400 mb-6 uppercase tracking-wider animate-pulse">
+            <span className="w-1.5 h-1.5 rounded-full bg-sky-400 shadow-[0_0_10px_#38bdf8]"></span>
+            Ilg'or SKUD va ANPR Tizimi
+          </div>
+          <h1 className="outfit animate-fade-in" style={{ fontSize: '4.2rem', lineHeight: 1.1, marginBottom: '24px', fontWeight: 900 }}>
+            SmartAccess & <span style={{ color: 'var(--primary)', textShadow: '0 0 30px rgba(14,165,233,0.3)' }}>SmartPark</span> <br /> Kelajak IT Yechimlari
           </h1>
-          <p style={{ fontSize: '1.25rem', color: 'var(--text-muted)', marginBottom: '32px', maxWidth: '600px' }}>
-            Bizning kompaniyamiz biznes jarayonlarini avtomatlashtirish, kirish-chiqish nazorati tizimlari (SKUD), parkovkalarni boshqarish va zamonaviy xavfsizlik texnologiyalarini joriy etish bilan shug'ullanadi.
+          <p style={{ fontSize: '1.2rem', color: 'var(--text-muted)', marginBottom: '32px', maxWidth: '600px', lineHeight: '1.7' }}>
+            Bizning kompaniyamiz biznes jarayonlarini avtomatlashtirish, kirish-chiqish nazorati (SKUD), sun'iy intellekt asosida mashina raqamlarini tanish va aqlli parkovkalarni tashkil qilish bo'yicha yuqori sifatli yechimlar taqdim etadi.
           </p>
           <div style={{ display: 'flex', gap: '16px' }}>
             <a href="#contact" className="btn-primary outfit">Hamkorlikni Boshlash</a>
@@ -92,20 +151,110 @@ const LandingPage = () => {
             }}>Dasturlar bilan tanishish <ArrowRight size={18} /></a>
           </div>
         </div>
-        <div style={{ flex: 1 }}>
-          <img 
-            src="/office.png" 
-            alt="SmartAccess Office" 
-            style={{ width: '100%', height: 'auto', borderRadius: '30px', boxShadow: '0 30px 60px rgba(0,0,0,0.1)' }} 
-            onError={(e) => {
-              e.target.src = "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=800&q=80";
-            }}
-          />
+
+        <div style={{ flex: '1', minWidth: '320px' }} className="animate-float">
+          {/* Hologram Box */}
+          <div className="relative border border-white/10 rounded-[2rem] bg-slate-950/80 p-6 shadow-2xl backdrop-blur-xl max-w-md mx-auto" style={{ borderBottom: '2px solid rgba(14,165,233,0.2)' }}>
+            
+            {/* Scan Screen */}
+            <div className="relative aspect-[16/10] bg-slate-900 border border-white/5 rounded-2xl overflow-hidden mb-6 flex flex-col items-center justify-center">
+              {/* Grid pattern overlay */}
+              <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(14,165,233,0.05)_1px,transparent_1px),linear-gradient(to_bottom,rgba(14,165,233,0.05)_1px,transparent_1px)] bg-[length:20px_20px] opacity-40"></div>
+              
+              {/* Scan Line */}
+              {simStep === 0 && <div className="scan-line"></div>}
+
+              {/* Simulated Camera Feed Info */}
+              <div className="absolute top-3 left-3 flex items-center gap-2 z-20">
+                <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse"></span>
+                <span className="text-[10px] font-mono tracking-widest text-white/70">ANPR_CAMERA_01</span>
+              </div>
+
+              {/* Status text */}
+              <div className="text-center z-10 space-y-4">
+                {simStep === 0 && (
+                  <div className="space-y-2">
+                    <div className="text-sm font-semibold tracking-wider text-blue-400 animate-pulse uppercase">Skanerlanmoqda...</div>
+                    <div className="text-[10px] font-mono text-gray-500">Kameralar signalni aniqlamoqda</div>
+                  </div>
+                )}
+
+                {simStep >= 1 && (
+                  <div className="space-y-4 animate-in fade-in duration-300">
+                    {/* License Plate Display */}
+                    <div className="relative border-4 border-slate-950 rounded-xl bg-white text-slate-950 font-bold px-6 py-2.5 text-2xl tracking-widest shadow-md flex items-center gap-2">
+                      <div className="flex flex-col items-center justify-between text-[8px] border-r border-slate-950 pr-1.5 mr-0.5">
+                        <span className="text-blue-600 font-extrabold leading-none">UZ</span>
+                      </div>
+                      <span>{simPlate}</span>
+                    </div>
+                    
+                    {simStep === 1 && (
+                      <div className="text-[11px] font-mono text-amber-400 uppercase tracking-widest animate-pulse">Ma'lumotlar solishtirilmoqda...</div>
+                    )}
+
+                    {simStep === 2 && (
+                      <div className="space-y-2">
+                        {simType === 'WHITELIST' && (
+                          <span className="px-3 py-1 bg-green-500/10 border border-green-500/30 text-green-400 rounded-full text-xs font-bold uppercase tracking-wider">
+                            🟢 OQ RO'YXAT - SHLAGBAUM OCHILDI
+                          </span>
+                        )}
+                        {simType === 'PAID' && (
+                          <span className="px-3 py-1 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 rounded-full text-xs font-bold uppercase tracking-wider">
+                            🟢 TO'LANDI - SHLAGBAUM OCHILDI
+                          </span>
+                        )}
+                        {simType === 'UNPAID' && (
+                          <div className="space-y-2">
+                            <div className="px-3 py-1 bg-red-500/10 border border-red-500/30 text-red-400 rounded-full text-xs font-bold uppercase tracking-wider animate-bounce">
+                              🔴 TO'LOV KUTILMOQDA (10 000 UZS)
+                            </div>
+                            <div className="text-[10px] text-gray-400">Kassir to'lov oynasida to'lovni kutmoqda...</div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Live Feed Event Log */}
+            <div className="space-y-2">
+              <div className="flex justify-between items-center text-xs text-gray-500 border-b border-white/5 pb-2">
+                <span>Real vaqt hodisalari</span>
+                <span className="text-[10px] text-blue-400 font-mono">LIVE FEED</span>
+              </div>
+              <div className="space-y-1.5 max-h-32 overflow-hidden">
+                {simLog.map((log) => (
+                  <div key={log.id} className="flex items-center justify-between p-2 rounded-lg bg-white/5 border border-white/5 text-[11px] font-mono animate-in slide-in-from-top duration-300">
+                    <div className="flex items-center gap-2">
+                      <span className="text-gray-500">{log.time}</span>
+                      <span className="font-bold">{log.plate}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className={`text-[9px] font-semibold px-2 py-0.5 rounded-full ${
+                        log.status === 'WHITELIST' ? 'bg-blue-500/10 text-blue-400' :
+                        log.status === 'PAID' ? 'bg-green-500/10 text-green-400' :
+                        'bg-red-500/10 text-red-400'
+                      }`}>
+                        {log.status}
+                      </span>
+                      <span className={`font-semibold ${log.action === 'OPENED' ? 'text-green-400' : 'text-amber-400'}`}>
+                        {log.action}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
       {/* ABOUT US SECTION */}
-      <section id="about" style={{ backgroundColor: 'var(--bg-sub)' }} className="section-padding">
+      <section id="about" style={{ backgroundColor: 'var(--bg-sub)' }} className="section-padding relative z-10">
         <div className="container">
           <div style={{ textAlign: 'center', marginBottom: '64px' }}>
             <h2 className="outfit" style={{ fontSize: '2.8rem', fontWeight: 800 }}>Kompaniya Haqida</h2>
