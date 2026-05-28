@@ -693,7 +693,7 @@ const LandingPage = () => {
                   </p>
                   <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', alignItems: 'center' }}>
                     {user ? (
-                      <a href="https://github.com/abdullayevaziz2006-arch/smartpark-shlagbaum/releases/download/v1.0.0/Shlagbaun.zip" target="_blank" rel="noreferrer" className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '10px 20px', fontSize: '0.9rem', background: '#0ea5e9' }}>
+                      <a href="https://github.com/abdullayevaziz2006-arch/smartpark-shlagbaum/releases/download/v1.0.0/SmartPark-Shlagbaum.zip" target="_blank" rel="noreferrer" className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '10px 20px', fontSize: '0.9rem', background: '#0ea5e9' }}>
                         <Download size={16} /> Yuklab Olish (Zip Paket)
                       </a>
                     ) : (
