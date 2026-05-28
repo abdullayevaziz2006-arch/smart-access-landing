@@ -181,7 +181,7 @@ const LandingPage = () => {
     const initGoogle = () => {
       if (window.google) {
         window.google.accounts.id.initialize({
-          client_id: "8653750532-6804h01pcfk9vhl0vptg596m1hpgi8t8.apps.googleusercontent.com",
+          client_id: "699051488236-2jpdbvgv6jf3m03jiup01uj7c72c9kmq.apps.googleusercontent.com",
           callback: (response) => {
             const decoded = parseJwt(response.credential);
             if (decoded && decoded.email) {
