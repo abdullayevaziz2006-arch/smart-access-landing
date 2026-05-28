@@ -31,6 +31,180 @@ const LandingPage = () => {
   const [activeProduct, setActiveProduct] = useState(null);
   const [activeTab, setActiveTab] = useState('agent'); // For download guide tabs
 
+  // SaaS Auth States
+  const [user, setUser] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('user')) || null;
+    } catch (e) {
+      return null;
+    }
+  });
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [authMode, setAuthMode] = useState('login'); // 'login', 'register', 'google-password'
+  const [phone, setPhone] = useState('');
+  const [password, setPassword] = useState('');
+  const [orgName, setOrgName] = useState('');
+  const [fullName, setFullName] = useState('');
+  const [googleEmail, setGoogleEmail] = useState('');
+  const [googleFullName, setGoogleFullName] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const CENTRAL_SERVER_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+    ? 'http://localhost:5000' 
+    : 'https://smart-access.onrender.com';
+
+  const parseJwt = (token) => {
+    try {
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(c => {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+      }).join(''));
+      return JSON.parse(jsonPayload);
+    } catch(e) {
+      return null;
+    }
+  };
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+    try {
+      const res = await fetch(`${CENTRAL_SERVER_URL}/api/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone, password })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Kirishda xatolik yuz berdi');
+      
+      localStorage.setItem('user', JSON.stringify(data));
+      setUser(data);
+      setAuthModalOpen(false);
+      setPhone('');
+      setPassword('');
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRegister = async (e) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+    try {
+      const res = await fetch(`${CENTRAL_SERVER_URL}/api/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orgName, fullName, phone, password })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Ro\'yxatdan o\'tishda xatolik yuz berdi');
+      
+      // Auto Login
+      const loginRes = await fetch(`${CENTRAL_SERVER_URL}/api/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone, password })
+      });
+      const loginData = await loginRes.json();
+      if (!loginRes.ok) throw new Error(loginData.error || 'Kirishda xatolik yuz berdi');
+
+      localStorage.setItem('user', JSON.stringify(loginData));
+      setUser(loginData);
+      setAuthModalOpen(false);
+      setOrgName('');
+      setFullName('');
+      setPhone('');
+      setPassword('');
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = async (email, name, pass = '') => {
+    setError('');
+    setLoading(true);
+    try {
+      const payload = { email, fullName: name };
+      if (pass) {
+        payload.password = pass;
+      }
+      const res = await fetch(`${CENTRAL_SERVER_URL}/api/auth/google-login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      
+      if (res.status === 202) {
+        setGoogleEmail(email);
+        setGoogleFullName(name);
+        setAuthMode('google-password');
+        setLoading(false);
+        return;
+      }
+      
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Google orqali kirishda xatolik');
+      
+      localStorage.setItem('user', JSON.stringify(data));
+      setUser(data);
+      setAuthModalOpen(false);
+      setGoogleEmail('');
+      setGoogleFullName('');
+      setPassword('');
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGooglePasswordSubmit = (e) => {
+    e.preventDefault();
+    if (!password) return setError("Parol kiritilishi shart");
+    handleGoogleLogin(googleEmail, googleFullName, password);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('user');
+    setUser(null);
+  };
+
+  useEffect(() => {
+    const initGoogle = () => {
+      if (window.google) {
+        window.google.accounts.id.initialize({
+          client_id: "8653750532-6804h01pcfk9vhl0vptg596m1hpgi8t8.apps.googleusercontent.com",
+          callback: (response) => {
+            const decoded = parseJwt(response.credential);
+            if (decoded && decoded.email) {
+              handleGoogleLogin(decoded.email, decoded.name || decoded.given_name);
+            }
+          }
+        });
+        
+        const btnContainer = document.getElementById("google-signin-btn");
+        if (btnContainer) {
+          window.google.accounts.id.renderButton(
+            btnContainer,
+            { theme: "outline", size: "large", width: 280 }
+          );
+        }
+      }
+    };
+
+    if (authModalOpen) {
+      setTimeout(initGoogle, 100);
+    }
+  }, [authModalOpen, authMode]);
+
   // ANPR Scanner Simulator State
   const [simStep, setSimStep] = useState(0); // 0: Scanning, 1: Recognized, 2: Access Granted / Payment Due
   const [simPlate, setSimPlate] = useState('01A777AA');
@@ -110,13 +284,23 @@ const LandingPage = () => {
           <a href="#download" className="nav-link">Yuklab Olish</a>
           <a href="#contact" className="nav-link">Bog'lanish</a>
           <ThemeToggle />
-          <button 
-            onClick={() => navigate('/login')} 
-            className="btn-primary" 
-            style={{ fontSize: '0.9rem' }}
-          >
-            Tizimga Kirish
-          </button>
+          {user ? (
+            <button 
+              onClick={handleLogout} 
+              className="btn-secondary" 
+              style={{ fontSize: '0.9rem', color: '#f87171' }}
+            >
+              {user.fullName.split(' ')[0]} (Chiqish)
+            </button>
+          ) : (
+            <button 
+              onClick={() => { setAuthMode('login'); setError(''); setAuthModalOpen(true); }} 
+              className="btn-primary" 
+              style={{ fontSize: '0.9rem' }}
+            >
+              Tizimga Kirish
+            </button>
+          )}
         </nav>
       </header>
 
@@ -508,14 +692,20 @@ const LandingPage = () => {
                     Hikvision ANPR kameralari va mahalliy shlagbaum boshqaruv platasidan keladigan signallarni cloud server bilan sinxronizatsiya qiluvchi lokal tunnel-agent dasturi.
                   </p>
                   <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', alignItems: 'center' }}>
-                    <a href="https://github.com/abdullayevaziz2006-arch/smartpark-shlagbaum/releases/download/v1.0.0/Shlagbaun.zip" target="_blank" rel="noreferrer" className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '10px 20px', fontSize: '0.9rem', background: '#0ea5e9' }}>
-                      <Download size={16} /> Yuklab Olish (Zip Paket)
-                    </a>
+                    {user ? (
+                      <a href="https://github.com/abdullayevaziz2006-arch/smartpark-shlagbaum/releases/download/v1.0.0/Shlagbaun.zip" target="_blank" rel="noreferrer" className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '10px 20px', fontSize: '0.9rem', background: '#0ea5e9' }}>
+                        <Download size={16} /> Yuklab Olish (Zip Paket)
+                      </a>
+                    ) : (
+                      <button onClick={() => { setAuthMode('login'); setError(''); setAuthModalOpen(true); }} className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '10px 20px', fontSize: '0.9rem', background: '#0ea5e9' }}>
+                        <Download size={16} /> Yuklab olish uchun kiring
+                      </button>
+                    )}
                     <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Tizim: Windows 10/11 x64, Node JS v18+</span>
                   </div>
                 </div>
               </div>
-
+ 
               {/* Card 2: SmartAccess Terminal Agent */}
               <div className="card" style={{ padding: '28px', display: 'flex', gap: '20px', alignItems: 'flex-start', background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '20px' }}>
                 <div style={{ background: 'rgba(99, 102, 241, 0.1)', color: '#6366f1', padding: '14px', borderRadius: '12px' }}><Laptop size={28} /></div>
@@ -525,9 +715,15 @@ const LandingPage = () => {
                     Bog'larga kirish joyidagi turniket terminallari (Hikvision/Dahua) bilan bog'lanib, shtrix va QR kodlarni onlayn tekshiruvchi va ruxsat beruvchi terminal dasturi.
                   </p>
                   <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', alignItems: 'center' }}>
-                    <a href="https://github.com/abdullayevaziz2006-arch/xiva-lokomotiv-qr/releases/download/v1.0.0/smart-access.zip" target="_blank" rel="noreferrer" className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '10px 20px', fontSize: '0.9rem', background: '#6366f1' }}>
-                      <Download size={16} /> Yuklab Olish (Zip Paket)
-                    </a>
+                    {user ? (
+                      <a href="https://github.com/abdullayevaziz2006-arch/xiva-lokomotiv-qr/releases/download/v1.0.0/smart-access.zip" target="_blank" rel="noreferrer" className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '10px 20px', fontSize: '0.9rem', background: '#6366f1' }}>
+                        <Download size={16} /> Yuklab Olish (Zip Paket)
+                      </a>
+                    ) : (
+                      <button onClick={() => { setAuthMode('login'); setError(''); setAuthModalOpen(true); }} className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '10px 20px', fontSize: '0.9rem', background: '#6366f1' }}>
+                        <Download size={16} /> Yuklab olish uchun kiring
+                      </button>
+                    )}
                     <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Tizim: Windows 10/11, Port: 8090</span>
                   </div>
                 </div>
@@ -832,6 +1028,116 @@ const LandingPage = () => {
       <footer style={{ padding: '40px 0', borderTop: '1px solid rgba(255,255,255,0.1)', background: '#0f172a', textAlign: 'center' }}>
         <p style={{ color: '#64748b' }}>© 2026 SmartAccess IT Solutions. Barcha huquqlar himoyalangan.</p>
       </footer>
+
+      {/* AUTH MODAL */}
+      {authModalOpen && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, width: '100%', height: '100%',
+          background: 'rgba(3, 7, 18, 0.85)', backdropFilter: 'blur(10px)',
+          zIndex: 3000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px'
+        }} onClick={() => setAuthModalOpen(false)}>
+          <div style={{
+            background: 'var(--bg-sub)', maxWidth: '400px', width: '100%',
+            borderRadius: '24px', padding: '32px', position: 'relative',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.7), 0 0 30px rgba(14, 165, 233, 0.15)',
+            border: '1px solid var(--border)'
+          }} onClick={e => e.stopPropagation()}>
+            
+            <button onClick={() => setAuthModalOpen(false)} style={{
+              position: 'absolute', top: '20px', right: '20px',
+              background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)'
+            }}><X size={20} /></button>
+
+            {authMode === 'login' && (
+              <form onSubmit={handleLogin}>
+                <h3 className="outfit" style={{ fontSize: '1.6rem', marginBottom: '24px', textAlign: 'center' }}>Tizimga Kirish</h3>
+                
+                {error && <div style={{ color: '#f87171', backgroundColor: 'rgba(248, 113, 113, 0.1)', padding: '10px 14px', borderRadius: '8px', fontSize: '0.85rem', marginBottom: '16px' }}>{error}</div>}
+
+                <div style={{ marginBottom: '16px' }}>
+                  <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>Telefon raqami yoki Email</label>
+                  <input type="text" value={phone} onChange={e => setPhone(e.target.value)} required placeholder="+998901234567" style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid var(--border)', background: '#1e293b', color: 'white', outline: 'none' }} />
+                </div>
+
+                <div style={{ marginBottom: '24px' }}>
+                  <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>Parol</label>
+                  <input type="password" value={password} onChange={e => setPassword(e.target.value)} required style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid var(--border)', background: '#1e293b', color: 'white', outline: 'none' }} />
+                </div>
+
+                <button type="submit" disabled={loading} className="btn-primary" style={{ width: '100%', justifyContent: 'center', marginBottom: '20px' }}>
+                  {loading ? 'Kirilmoqda...' : 'Kirish'}
+                </button>
+
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
+                  <div id="google-signin-btn" style={{ minHeight: '40px', display: 'flex', justifyContent: 'center' }}></div>
+                  <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                    Hisobingiz yo'qmi? <span onClick={() => { setAuthMode('register'); setError(''); }} style={{ color: 'var(--primary)', cursor: 'pointer', fontWeight: 600 }}>Ro'yxatdan o'tish</span>
+                  </span>
+                </div>
+              </form>
+            )}
+
+            {authMode === 'register' && (
+              <form onSubmit={handleRegister}>
+                <h3 className="outfit" style={{ fontSize: '1.6rem', marginBottom: '20px', textAlign: 'center' }}>Ro'yxatdan O'tish</h3>
+                
+                {error && <div style={{ color: '#f87171', backgroundColor: 'rgba(248, 113, 113, 0.1)', padding: '10px 14px', borderRadius: '8px', fontSize: '0.85rem', marginBottom: '16px' }}>{error}</div>}
+
+                <div style={{ marginBottom: '12px' }}>
+                  <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>Tashkilot nomi (masalan, Xiva Park)</label>
+                  <input type="text" value={orgName} onChange={e => setOrgName(e.target.value)} required style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border)', background: '#1e293b', color: 'white', outline: 'none' }} />
+                </div>
+
+                <div style={{ marginBottom: '12px' }}>
+                  <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>To'liq ismingiz</label>
+                  <input type="text" value={fullName} onChange={e => setFullName(e.target.value)} required style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border)', background: '#1e293b', color: 'white', outline: 'none' }} />
+                </div>
+
+                <div style={{ marginBottom: '12px' }}>
+                  <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>Telefon raqami</label>
+                  <input type="text" value={phone} onChange={e => setPhone(e.target.value)} required placeholder="+998901234567" style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border)', background: '#1e293b', color: 'white', outline: 'none' }} />
+                </div>
+
+                <div style={{ marginBottom: '20px' }}>
+                  <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>Parol (Lokal dastur uchun)</label>
+                  <input type="password" value={password} onChange={e => setPassword(e.target.value)} required style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border)', background: '#1e293b', color: 'white', outline: 'none' }} />
+                </div>
+
+                <button type="submit" disabled={loading} className="btn-primary" style={{ width: '100%', justifyContent: 'center', marginBottom: '16px' }}>
+                  {loading ? 'Yaratilmoqda...' : "Ro'yxatdan o'tish"}
+                </button>
+
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
+                  <div id="google-signin-btn" style={{ minHeight: '40px', display: 'flex', justifyContent: 'center' }}></div>
+                  <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                    Hisobingiz bormi? <span onClick={() => { setAuthMode('login'); setError(''); }} style={{ color: 'var(--primary)', cursor: 'pointer', fontWeight: 600 }}>Tizimga kirish</span>
+                  </span>
+                </div>
+              </form>
+            )}
+
+            {authMode === 'google-password' && (
+              <form onSubmit={handleGooglePasswordSubmit}>
+                <h3 className="outfit" style={{ fontSize: '1.5rem', marginBottom: '16px', textAlign: 'center' }}>Parol O'rnatish</h3>
+                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '20px', textAlign: 'center' }}>
+                  Google orqali ro'yxatdan o'tish muvaffaqiyatli. Endi shlagbaum kompyuteridagi dasturga offline kira olishingiz uchun o'zingizga parol o'rnating.
+                </p>
+
+                {error && <div style={{ color: '#f87171', backgroundColor: 'rgba(248, 113, 113, 0.1)', padding: '10px 14px', borderRadius: '8px', fontSize: '0.85rem', marginBottom: '16px' }}>{error}</div>}
+
+                <div style={{ marginBottom: '24px' }}>
+                  <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>Yangi Parol</label>
+                  <input type="password" value={password} onChange={e => setPassword(e.target.value)} required style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid var(--border)', background: '#1e293b', color: 'white', outline: 'none' }} />
+                </div>
+
+                <button type="submit" disabled={loading} className="btn-primary" style={{ width: '100%', justifyContent: 'center' }}>
+                  {loading ? 'Tasdiqlanmoqda...' : "Tizimni faollashtirish"}
+                </button>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
